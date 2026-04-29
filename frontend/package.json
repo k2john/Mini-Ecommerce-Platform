@@ -4,6 +4,9 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "vite": "vite",
+    "vite:build": "vite build",
+    "vite:preview": "vite preview",
     "build": "ng build",
     "build:prod": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
@@ -37,6 +40,7 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.5",
-    "typescript": "~5.2.2"
+    "typescript": "~5.2.2",
+    "vite": "^5.4.19"
   }
 }

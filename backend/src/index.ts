@@ -28,10 +28,26 @@ app.use(helmet({
 }));
 
 // ─── CORS ──────────────────────────────────────────────────────────────────────
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:4200,http://127.0.0.1:4200,http://localhost:4201,http://127.0.0.1:4201')
+const defaultDevOrigins = [
+  'http://localhost:4200',
+  'http://127.0.0.1:4200',
+  'http://localhost:4201',
+  'http://127.0.0.1:4201',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+];
+
+const envOrigins = (process.env.ALLOWED_ORIGINS || '')
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
+
+const allowedOrigins = Array.from(
+  new Set([
+    ...envOrigins,
+    ...(process.env.NODE_ENV === 'production' ? [] : defaultDevOrigins),
+  ]),
+);
 
 const wildcardToRegExp = (pattern: string): RegExp => {
   const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
@@ -113,6 +129,15 @@ app.get('/health', (_req, res) => {
   });
 });
 
+app.get('/', (_req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'E-Commerce API is running',
+    docs: '/api/docs',
+    health: '/health',
+  });
+});
+
 // ─── API Routes ────────────────────────────────────────────────────────────────
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/products', productRoutes);
@@ -152,4 +177,3 @@ const startServer = (port: number, attempt = 1): Server => {
 startServer(DEFAULT_PORT);
 
 export default app;
-
