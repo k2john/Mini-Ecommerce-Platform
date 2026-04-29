@@ -1,5 +1,5 @@
 {
-  "buildCommand": "node -e \"const fs=require('fs');let api=process.env.NG_APP_API_URL||'https://ecommerce-server-eys5.onrender.com/api';while(api.endsWith('/')) api=api.slice(0,-1);fs.mkdirSync('src/assets',{recursive:true});fs.writeFileSync('src/assets/env.js', `window.__env = {\\n  apiUrl: '${api}',\\n};\\n`);\" && npm run build:prod",
+  "buildCommand": "node -e \"const fs=require('fs');let api=process.env.NG_APP_API_URL||'https://final-ecommerce-33sd.onrender.com/api';while(api.endsWith('/')) api=api.slice(0,-1);fs.mkdirSync('src/assets',{recursive:true});fs.writeFileSync('src/assets/env.js', `window.__env = {\\n  apiUrl: '${api}',\\n};\\n`);\" && npm run build:prod",
   "outputDirectory": "dist/ecommerce-client/browser",
   "rewrites": [
     {

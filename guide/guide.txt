@@ -339,3 +339,8 @@ DATABASE ERRORS:
   - Check SUPABASE_SERVICE_KEY (not anon key) is set correctly
   - Verify RLS policies aren't blocking queries
   - Check table names match exactly (case-sensitive)
+
+
+
+render
+https://final-ecommerce-33sd.onrender.com
