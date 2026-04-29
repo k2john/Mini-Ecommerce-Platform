@@ -1,0 +1,341 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║            BAZAAR PLATFORM - COMPLETE SETUP & DEPLOYMENT GUIDE             ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 1: SUPABASE SETUP (Database)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 1: Create Supabase Project
+  1. Go to https://supabase.com and create a free account
+  2. Click "New project"
+  3. Enter:
+     - Project name: bazaar-platform
+     - Database Password: (create a strong password, save it!)
+     - Region: Southeast Asia (Singapore) - or closest to you
+  4. Click "Create new project" — wait ~2 minutes
+
+STEP 2: Run the SQL Schema
+  1. In Supabase dashboard, click "SQL Editor" in the left sidebar
+  2. Click "+ New query"
+  3. Open the file: bazaar-platform/supabase_schema.sql
+  4. Copy ALL contents and paste into the SQL editor
+  5. Click "Run" (green button)
+  6. You should see "Success. No rows returned" — schema is set!
+
+STEP 3: Get Your API Keys
+  1. In Supabase, click "Project Settings" (gear icon)
+  2. Click "API" in the left menu
+  3. Copy these values:
+     - Project URL  →  SUPABASE_URL
+     - anon public key  →  SUPABASE_ANON_KEY
+     - service_role key  →  SUPABASE_SERVICE_KEY (⚠️ Keep SECRET!)
+
+STEP 4: Disable Row Level Security (for development)
+  1. In Supabase, click "Authentication" → "Policies"
+  2. For each table (users, products, orders, etc.):
+     - Click the table
+     - Toggle OFF "Enable RLS" OR add permissive policies
+  NOTE: For production, enable RLS with proper policies.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 2: BACKEND SETUP (Node.js + Express)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 1: Install Dependencies
+  cd bazaar-platform/server
+  npm install
+
+STEP 2: Configure Environment
+  # Copy the example file
+  cp .env.example .env
+
+  # Open .env and fill in your values:
+  nano .env  (or use any text editor)
+
+  ─── Contents of .env ───────────────────────────────────────────
+  PORT=3000
+  NODE_ENV=development
+
+  # From Supabase Project Settings > API
+  SUPABASE_URL=https://abcdefghijklmnop.supabase.co
+  SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIs...your-anon-key
+  SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIs...your-service-key
+
+  # JWT Secret (make this random and long, 32+ chars)
+  node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+  JWT_SECRET=my-super-secret-jwt-key-change-in-production-xyz123abc
+
+  # URL of your Angular frontend
+  CLIENT_URL=http://localhost:4200
+  ────────────────────────────────────────────────────────────────
+
+STEP 3: Create logs directory
+  mkdir -p logs
+
+STEP 4: Start the Backend
+  npm run dev
+  → Server runs at http://localhost:3000
+  → Swagger docs at http://localhost:3000/api/docs
+  → Health check: http://localhost:3000/health
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 3: FRONTEND SETUP (Angular)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 1: Install Angular CLI globally (if not installed)
+  npm install -g @angular/cli
+
+STEP 2: Install Dependencies
+  cd bazaar-platform/client
+  npm install
+
+STEP 3: Configure the Backend URL
+  Open: src/environments/environment.ts
+  ─── Content ────────────────────────────────────────────────────
+  export const environment = {
+    production: false,
+    apiUrl: 'http://localhost:3000/api'   ← Backend URL
+  };
+  ────────────────────────────────────────────────────────────────
+
+STEP 4: Start the Frontend
+  npm start   (or ng serve)
+  → App runs at http://localhost:4200
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 4: CONNECTING FRONTEND ↔ BACKEND
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+HOW THE CONNECTION WORKS:
+  Angular (port 4200) → HTTP requests → Express (port 3000) → Supabase
+
+WHERE TO CHANGE THE BACKEND URL (Frontend side):
+  File: client/src/environments/environment.ts
+  ─────────────────────────────────────────────
+  Development:    apiUrl: 'http://localhost:3000/api'
+  Production:     apiUrl: 'https://your-render-app.onrender.com/api'
+
+WHERE TO CHANGE THE FRONTEND URL (Backend side):
+  File: server/.env
+  ──────────────────
+  Development:    CLIENT_URL=http://localhost:4200
+  Production:     CLIENT_URL=https://your-vercel-app.vercel.app
+
+HOW ANGULAR CALLS THE BACKEND (example flow):
+  1. User clicks "Add to Cart"
+  2. CartService calls:
+       this.http.post('http://localhost:3000/api/cart', { product_id, quantity })
+  3. AuthInterceptor automatically adds: Authorization: Bearer <jwt-token>
+  4. Express receives request, validates JWT, processes, returns JSON
+  5. Angular displays result
+
+PROXY DURING DEVELOPMENT (optional alternative):
+  The file client/proxy.conf.json redirects /api/* to localhost:3000
+  This avoids CORS issues during development.
+  When using proxy, set apiUrl to '' (empty string) in environment.ts
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 5: GITHUB SETUP & PUSH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 1: Create GitHub Repository
+  1. Go to https://github.com
+  2. Click "+" → "New repository"
+  3. Name: bazaar-platform
+  4. Set to Public (for free deployment services)
+  5. Do NOT initialize with README (we have our own)
+  6. Click "Create repository"
+
+STEP 2: Initialize Git & Push
+  # From the bazaar-platform root folder:
+  cd bazaar-platform
+
+  git init
+  git add .
+  git commit -m "Initial commit: Bazaar Platform full-stack app"
+
+  # Add the remote (replace with your GitHub URL)
+  git remote add origin https://github.com/YOUR_USERNAME/bazaar-platform.git
+
+  git branch -M main
+  git push -u origin main
+
+STEP 3: Verify on GitHub
+  - Check all files are uploaded
+  - Verify .env is NOT in GitHub (it's in .gitignore)
+  - Confirm server/uploads/ is empty (only .gitkeep)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 6: DEPLOY BACKEND TO RENDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 1: Create Render Account
+  1. Go to https://render.com → Sign up with GitHub
+
+STEP 2: Create New Web Service
+  1. Click "New" → "Web Service"
+  2. Connect your GitHub repository
+  3. Configure:
+     - Name: bazaar-backend
+     - Root Directory: server
+     - Runtime: Node
+     - Build Command: npm install && npm run build
+     - Start Command: npm start
+     - Instance Type: Free
+
+STEP 3: Add Environment Variables
+  In Render dashboard → "Environment":
+  ┌─────────────────────┬────────────────────────────────────────┐
+  │ KEY                 │ VALUE                                  │
+  ├─────────────────────┼────────────────────────────────────────┤
+  │ NODE_ENV            │ production                             │
+  │ PORT                │ 3000                                   │
+  │ SUPABASE_URL        │ https://xxx.supabase.co                │
+  │ SUPABASE_ANON_KEY   │ eyJ...your-key                         │
+  │ SUPABASE_SERVICE_KEY│ eyJ...your-service-key                 │
+  │ JWT_SECRET          │ your-production-secret-min-32-chars    │
+  │ CLIENT_URL          │ https://your-vercel-app.vercel.app     │
+  └─────────────────────┴────────────────────────────────────────┘
+
+STEP 4: Deploy
+  - Click "Create Web Service"
+  - Wait for deployment (3-5 minutes)
+  - Your backend URL: https://bazaar-backend.onrender.com
+  - Test: https://bazaar-backend.onrender.com/health
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 7: DEPLOY FRONTEND TO VERCEL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 1: Update Production Environment
+  In client/src/environments/environment.prod.ts:
+  ─────────────────────────────────────────────────
+  export const environment = {
+    production: true,
+    apiUrl: 'https://bazaar-backend.onrender.com/api'
+  };
+  ─────────────────────────────────────────────────
+  Then commit and push: git add . && git commit -m "Update prod URL" && git push
+
+STEP 2: Create Vercel Account
+  1. Go to https://vercel.com → Sign up with GitHub
+
+STEP 3: Import Project
+  1. Click "Add New" → "Project"
+  2. Select your bazaar-platform repository
+  3. Configure:
+     - Root Directory: client
+     - Framework: Angular
+     - Build Command: npm run build:prod
+     - Output Directory: dist/bazaar-client
+
+STEP 4: Add Vercel Config for SPA routing
+  Create file: client/vercel.json
+  ────────────────────────────────────
+  {
+    "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  }
+  ────────────────────────────────────
+
+STEP 5: Deploy
+  - Click "Deploy"
+  - Wait 2-3 minutes
+  - Your frontend URL: https://bazaar-platform.vercel.app
+
+STEP 6: Update Backend CORS
+  - Go back to Render → Your backend service → Environment
+  - Update CLIENT_URL to: https://bazaar-platform.vercel.app
+  - Save and redeploy
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 8: API ENDPOINTS REFERENCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AUTH
+  POST   /api/auth/register          Register new user
+  POST   /api/auth/login             Login
+  GET    /api/auth/profile           Get profile (auth)
+  PUT    /api/auth/profile           Update profile + avatar (auth)
+  PUT    /api/auth/change-password   Change password (auth)
+
+PRODUCTS
+  GET    /api/products               List products (public, filterable)
+  GET    /api/products/:slug         Single product (public)
+  GET    /api/products/admin/all     All products for admin (admin)
+  POST   /api/products               Create product (admin)
+  PUT    /api/products/:id           Update product (admin)
+  DELETE /api/products/:id           Delete product (admin)
+
+CART
+  GET    /api/cart                   Get user cart (auth)
+  POST   /api/cart                   Add to cart (auth)
+  PUT    /api/cart/:productId        Update cart item quantity (auth)
+  DELETE /api/cart/:productId        Remove cart item (auth)
+  DELETE /api/cart/clear             Clear cart (auth)
+
+WISHLIST
+  GET    /api/wishlist               Get wishlist (auth)
+  POST   /api/wishlist/toggle        Toggle wishlist item (auth)
+  DELETE /api/wishlist/:productId    Remove from wishlist (auth)
+
+ORDERS
+  POST   /api/orders                 Create order (auth)
+  GET    /api/orders                 Get my orders (auth)
+  GET    /api/orders/:id             Get order detail (auth)
+  GET    /api/orders/admin/all       All orders (admin)
+  PUT    /api/orders/:id/status      Update order status (admin)
+
+REVIEWS
+  GET    /api/reviews/product/:id    Get product reviews (public)
+  POST   /api/reviews                Submit review (auth)
+  PUT    /api/reviews/:id            Edit review (auth, own)
+  DELETE /api/reviews/:id            Delete review (auth/admin)
+
+ADMIN
+  GET    /api/admin/dashboard        Dashboard stats (admin)
+  GET    /api/admin/users            All users (admin)
+  PUT    /api/admin/users/:id        Update user role/status (admin)
+  GET    /api/admin/categories       All categories (admin)
+  POST   /api/admin/categories       Create category (admin)
+  DELETE /api/admin/categories/:id   Delete category (admin)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 9: DEFAULT CREDENTIALS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Admin Login:
+    Email:    admin@bazaar.com
+    Password: Admin@123
+    ⚠️  CHANGE THIS IMMEDIATELY after first login!
+
+  To create a new admin:
+    1. Register normally through the app
+    2. In Supabase → Table Editor → users
+    3. Find the user, change role to 'admin'
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 10: TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CORS ERRORS:
+  - Check CLIENT_URL in server .env matches your Angular URL exactly
+  - No trailing slash: ✓ http://localhost:4200  ✗ http://localhost:4200/
+
+401 UNAUTHORIZED:
+  - Token expired → Log out and log in again
+  - JWT_SECRET mismatch between environments
+
+404 NOT FOUND on refresh:
+  - Add vercel.json rewrites (Part 7, Step 4)
+  - For Netlify, add _redirects file: "/* /index.html 200"
+
+IMAGES NOT SHOWING:
+  - In production, uploaded images need persistent storage
+  - Use Supabase Storage instead of local uploads
+  - Or use Cloudinary/S3 for production file storage
+
+DATABASE ERRORS:
+  - Check SUPABASE_SERVICE_KEY (not anon key) is set correctly
+  - Verify RLS policies aren't blocking queries
+  - Check table names match exactly (case-sensitive)

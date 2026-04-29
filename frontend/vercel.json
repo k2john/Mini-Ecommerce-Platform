@@ -1,0 +1,10 @@
+{
+  "buildCommand": "node -e \"const fs=require('fs');let api=process.env.NG_APP_API_URL||'https://mini-e-commerce-platform-group11.onrender.com/api';while(api.endsWith('/')) api=api.slice(0,-1);fs.mkdirSync('src/assets',{recursive:true});fs.writeFileSync('src/assets/env.js', `window.__env = {\\n  apiUrl: '${api}',\\n};\\n`);\" && npm run build:prod",
+  "outputDirectory": "dist/ecommerce-client/browser",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+.npm
+
+# Build outputs
+dist/
+build/
+
+# Environment files
+.env
+*.env.local
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Angular
+.angular/
+client/.angular/
+
+# Uploads
+server/uploads/
+
+# Local Netlify folder
+.netlify
