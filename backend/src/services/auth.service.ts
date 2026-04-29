@@ -158,7 +158,18 @@ export class AuthService {
   }
 
   // ================= UPDATE =================
-  async updateProfile(userId: string, updates: Partial<User>) {
+  async updateProfile(
+    userId: string,
+    updates: Partial<User>,
+    avatarBuffer?: Buffer,
+    avatarName?: string
+  ) {
+    let avatarUrl: string | undefined;
+
+    if (avatarBuffer && avatarName) {
+      avatarUrl = await this.uploadAvatar(avatarBuffer, avatarName, userId);
+    }
+
     const { error } = await supabase
       .from(USERS_TABLE)
       .update({
@@ -166,6 +177,7 @@ export class AuthService {
         email: updates.email,
         phone: updates.phone,
         address: updates.address,
+        avatar: avatarUrl ?? updates.avatar,
         updated_at: new Date().toISOString(),
       })
       .eq('id', userId);
