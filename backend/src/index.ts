@@ -27,70 +27,44 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
 }));
 
-// ─── CORS ──────────────────────────────────────────────────────────────────────
-const defaultDevOrigins = [
-  'http://localhost:4200',
-  'http://127.0.0.1:4200',
-  'http://localhost:4201',
-  'http://127.0.0.1:4201',
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-];
-
-const envOrigins = (process.env.ALLOWED_ORIGINS || '')
-  .split(',')
-  .map((origin) => origin.trim())
-  .filter(Boolean);
-
-const allowedOrigins = Array.from(
-  new Set([
-    ...envOrigins,
-    ...(process.env.NODE_ENV === 'production' ? [] : defaultDevOrigins),
-  ]),
-);
-
-const wildcardToRegExp = (pattern: string): RegExp => {
-  const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
-  return new RegExp(`^${escaped.replace(/\*/g, '.*')}$`);
-};
-
-const isAllowedOrigin = (origin: string): boolean => {
-  return allowedOrigins.some((allowedOrigin) => {
-    if (allowedOrigin === '*') return true;
-    if (allowedOrigin === origin) return true;
-    if (allowedOrigin.includes('*')) {
-      return wildcardToRegExp(allowedOrigin).test(origin);
-    }
-    return false;
-  });
-};
+// ─── CORS (FINAL FIX) ──────────────────────────────────────────────────────────
+const FRONTEND_URL = 'https://mini-ecommerce-platform-p2si.vercel.app';
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || isAllowedOrigin(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error(`CORS: Origin ${origin} not allowed`));
+    // allow tools like Postman or server-to-server
+    if (!origin) return callback(null, true);
+
+    // allow your deployed frontend + localhost
+    if (
+      origin === FRONTEND_URL ||
+      origin.includes('localhost')
+    ) {
+      return callback(null, true);
     }
+
+    console.error('❌ Blocked by CORS:', origin);
+    return callback(new Error('Not allowed by CORS'));
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 }));
 
+// handle preflight
+app.options('*', cors());
+
 // ─── Rate Limiting ─────────────────────────────────────────────────────────────
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 200,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { success: false, message: 'Too many requests, please try again later.' },
 });
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
-  message: { success: false, message: 'Too many auth attempts, please try again later.' },
 });
 
 app.use(limiter);
@@ -109,10 +83,7 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev', {
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // ─── API Documentation ─────────────────────────────────────────────────────────
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'E-Commerce API Docs',
-}));
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get('/api/docs.json', (_req, res) => {
   res.setHeader('Content-Type', 'application/json');
@@ -124,17 +95,13 @@ app.get('/health', (_req, res) => {
   res.json({
     success: true,
     message: 'Server is running',
-    environment: process.env.NODE_ENV,
-    timestamp: new Date().toISOString(),
   });
 });
 
 app.get('/', (_req, res) => {
-  res.status(200).json({
+  res.json({
     success: true,
     message: 'E-Commerce API is running',
-    docs: '/api/docs',
-    health: '/health',
   });
 });
 
@@ -149,26 +116,9 @@ app.use(notFound);
 app.use(errorHandler);
 
 // ─── Start Server ─────────────────────────────────────────────────────────────
-const isDev = process.env.NODE_ENV !== 'production';
-const MAX_PORT_ATTEMPTS = 10;
-
-const startServer = (port: number, attempt = 1): Server => {
+const startServer = (port: number): Server => {
   const server = app.listen(port, () => {
-    logger.info(`Server running on http://localhost:${port}`);
-    logger.info(`API Docs: http://localhost:${port}/api/docs`);
-    logger.info(`Environment: ${process.env.NODE_ENV}`);
-  });
-
-  server.on('error', (error: NodeJS.ErrnoException) => {
-    if (error.code === 'EADDRINUSE' && isDev && attempt < MAX_PORT_ATTEMPTS) {
-      const nextPort = port + 1;
-      logger.warn(`Port ${port} is busy, retrying on ${nextPort}...`);
-      startServer(nextPort, attempt + 1);
-      return;
-    }
-
-    logger.error(`Failed to start server on port ${port}: ${error.message}`);
-    process.exit(1);
+    logger.info(`Server running on port ${port}`);
   });
 
   return server;
