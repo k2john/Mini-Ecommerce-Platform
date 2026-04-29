@@ -141,7 +141,7 @@ import { Product } from '../../../shared/models';
                   class="flex-1 border border-stone-200 text-stone-700 font-semibold py-2.5 rounded-xl text-sm hover:bg-stone-50 transition-colors">
                   Cancel
                 </button>
-                <button type="submit" [disabled]="formLoading || productForm.invalid"
+                <button type="submit" [disabled]="formLoading"
                   class="flex-1 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
                   @if (formLoading) {
                     <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
@@ -315,6 +315,9 @@ export class AdminProductsComponent implements OnInit {
     } else {
       this.productForm.reset({ active: true, featured: false, price: 0, stock: 0 });
     }
+    this.productForm.markAsUntouched();
+    this.productForm.markAsPristine();
+    this.productForm.updateValueAndValidity();
     this.showForm = true;
   }
 
@@ -405,7 +408,7 @@ export class AdminProductsComponent implements OnInit {
 
   showToast(message: string, type: 'success' | 'error'): void {
     this.toast = { message, type };
-    setTimeout(() => this.toast = null, 3000);
+    setTimeout(() => this.toast = null, 3001);
   }
 
   formatCurrency(value: number | string | null | undefined): string {
