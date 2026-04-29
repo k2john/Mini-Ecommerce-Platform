@@ -28,31 +28,44 @@ app.use(helmet({
 }));
 
 // ─── CORS (FINAL FIX) ──────────────────────────────────────────────────────────
-const FRONTEND_URL = 'https://mini-ecommerce-platform-p2si.vercel.app';
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
-app.use(cors({
-  origin: (origin, callback) => {
-    // allow tools like Postman or server-to-server
-    if (!origin) return callback(null, true);
+const allowVercelPreviewDomains = (process.env.ALLOW_VERCEL_PREVIEW_DOMAINS || 'true').toLowerCase() === 'true';
 
-    // allow your deployed frontend + localhost
-    if (
-      origin === FRONTEND_URL ||
-      origin.includes('localhost')
-    ) {
-      return callback(null, true);
+const isAllowedOrigin = (origin: string): boolean => {
+  if (allowedOrigins.includes(origin)) return true;
+  if (origin.includes('localhost')) return true;
+
+  if (allowVercelPreviewDomains) {
+    try {
+      const parsedOrigin = new URL(origin);
+      if (parsedOrigin.hostname.endsWith('.vercel.app')) return true;
+    } catch {
+      return false;
     }
+  }
 
-    console.error('❌ Blocked by CORS:', origin);
+  return false;
+};
+
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (isAllowedOrigin(origin)) return callback(null, true);
+
+    logger.error(`Blocked by CORS: ${origin}`);
     return callback(new Error('Not allowed by CORS'));
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
-}));
+};
 
-// handle preflight
-app.options('*', cors());
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // ─── Rate Limiting ─────────────────────────────────────────────────────────────
 const limiter = rateLimit({
