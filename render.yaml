@@ -4,5 +4,5 @@ services:
     env: node
     rootDir: backend
     buildCommand: npm install && npm run build
-    startCommand: npm start
+    startCommand: npm run build && npm start
     autoDeploy: true
