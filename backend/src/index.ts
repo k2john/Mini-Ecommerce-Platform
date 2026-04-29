@@ -20,7 +20,7 @@ import { notFound, errorHandler } from './middleware/error.middleware';
 import logger from './utils/logger';
 
 const app = express();
-const DEFAULT_PORT = Number(process.env.PORT) || 3000;
+const DEFAULT_PORT = Number(process.env.PORT) || 3001;
 
 // ─── Security Middleware ───────────────────────────────────────────────────────
 app.use(helmet({
