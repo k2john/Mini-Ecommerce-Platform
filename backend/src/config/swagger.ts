@@ -11,7 +11,7 @@ const getProductionApiUrl = (): string => {
     return `${renderExternalUrl.replace(/\/+$/, '')}/api`;
   }
 
-  return 'https://your-api.onrender.com/api';
+  return 'https://final-ecommerce-33sd.onrender.com/api';
 };
 
 const options: swaggerJsdoc.Options = {
