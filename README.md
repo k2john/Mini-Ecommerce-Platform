@@ -1,5 +1,8 @@
 # 🛍️ Bazaar — Mini E-Commerce Platform
 
+A Bazaar — Mini E-Commerce Platform is a simplified online marketplace designed to demonstrate how digital buying and selling works, similar to platforms like Amazon or Shopee. Its importance lies in helping developers and small businesses understand and implement core e-commerce functions such as product listing, shopping carts, and order processing. The main purpose of this platform is to provide a basic system where sellers can offer products, buyers can browse and purchase items, and administrators can manage operations, making it both a practical learning tool and a foundation for building larger online business systems.
+
+
 > Full-Stack Web Application | ITAS4 (Client-Side) & ITAS5 (Server-Side) Final Project
 
 A complete, production-ready e-commerce platform built with **Angular 17**, **Node.js + Express + TypeScript**, and **Supabase (Postgres + Storage)**.
