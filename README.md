@@ -13,9 +13,9 @@ A complete, production-ready e-commerce platform built with **Angular 17**, **No
 
 | Service | URL |
 |---------|-----|
-| 🌐 Frontend (Vercel) | `https://your-project.vercel.app` |
-| ⚙️ Backend API (Render) | `https://your-api.onrender.com` |
-| 📚 API Documentation | `https://your-api.onrender.com/api/docs` |
+| 🌐 Frontend (Vercel) | `https://mini-ecommerce-platform-p2si.vercel.app` |
+| ⚙️ Backend API (Render) | `https://final-ecommerce-33sd.onrender.com` |
+| 📚 API Documentation | `https://final-ecommerce-33sd.onrender.com/api/docs` |
 
 > **Note:** Replace placeholder URLs with your actual deployed URLs after deployment.
 
@@ -94,7 +94,7 @@ A complete, production-ready e-commerce platform built with **Angular 17**, **No
 
 ### 🌐 API Features
 - [x] RESTful CRUD for products, orders, cart, users
-- [x] Firebase Firestore integration
+- [x] Supabase integration
 - [x] Input validation with express-validator
 - [x] CORS, Helmet, rate limiting
 - [x] File upload (Multer + Firebase Storage)
@@ -159,22 +159,22 @@ ng build --configuration production
 
 ---
 
-## 🔥 Firebase Setup
+## 🔥 Supabase Setup
 
-1. Go to [Firebase Console](https://console.firebase.google.com)
+1. Go to [Supbase](https://supabase.google.com)
 2. Create a new project
-3. Enable **Firestore Database** (start in test mode)
+3. Enable **Supabase Database** 
 4. Enable **Storage**
 5. Go to **Project Settings → Service Accounts**
 6. Click **Generate new private key** — download the JSON
 7. Copy the values into your `.env` file:
 
 ```env
-FIREBASE_PROJECT_ID=your-project-id
-FIREBASE_PRIVATE_KEY_ID=...
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
-FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxx@your-project.iam.gserviceaccount.com
-FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+SUPABASE_PROJECT_ID=your-project-id
+SUPABASE_PRIVATE_KEY_ID=...
+SUPABASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+SUPABASE_CLIENT_EMAIL=supabase-adminsdk-xxx@your-project.iam.gserviceaccount.com
+SUPABASE_STORAGE_BUCKET=your-project.appspot.com
 ```
 
 ### Supabase Collections
@@ -295,12 +295,12 @@ bazaar-ecommerce/
 ├── server/                          # Node.js + Express Backend
 │   ├── src/
 │   │   ├── config/
-│   │   │   ├── firebase.ts          # Firebase Admin SDK init
+│   │   │   ├── Supabase.ts          # Supabase Admin SDK init
 │   │   │   └── swagger.ts           # Swagger/OpenAPI config
 │   │   ├── controllers/             # Request handlers
 │   │   ├── middleware/              # Auth, error, upload, validation
 │   │   ├── routes/                  # Express routers with JSDoc
-│   │   ├── services/                # Business logic (Firestore ops)
+│   │   ├── services/                # Business logic (Supabase ops)
 │   │   ├── types/                   # TypeScript interfaces
 │   │   ├── utils/                   # Logger, response helpers
 │   │   └── index.ts                 # Express app entry point
@@ -373,7 +373,7 @@ bazaar-ecommerce/
 - [x] Input validation (express-validator)
 - [x] JWT Authentication
 - [x] Role-based Authorization (Admin/User)
-- [x] Firebase Firestore database integration
+- [x] Supabase database integration
 - [x] File upload (Multer + Firebase Storage)
 - [x] Swagger/OpenAPI documentation at `/api/docs`
 
